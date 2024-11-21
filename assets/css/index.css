@@ -37,22 +37,6 @@ body {
 .yellow { background-color: #ffbd2e; }
 .green { background-color: #28ca42; }
 
-
-.ascii-art {
-    background-color: #1e1e1e;
-    padding: 13px;
-    font-family: 'Courier New', Courier, monospace;
-    white-space: pre;
-    animation: dropDown 1s ease forwards;
-    opacity: 0; /* Initially hidden */
-    transform: translateY(-50px); /* Start position above */
-}
-
-.ascii-art pre {
-    color: #00d7a7;
-    font-size: 15px;
-}
-
 @keyframes dropDown {
     0% {
         opacity: 0;
@@ -87,7 +71,7 @@ body {
     background-color: transparent;
     caret-color: rgb(0, 207, 145);
     border: none;
-    color: #f0f0f0;
+    color: #49AEE6;
     font-family: 'Courier New', Courier, monospace;
     font-size: 16px;
     outline: none;
@@ -95,7 +79,7 @@ body {
 }
 
 .output {
-    margin-top: 10px;
+    display: flex;
     white-space: pre-wrap;
     font-family: 'Courier New', Courier, monospace;
     font-size: 16px;
