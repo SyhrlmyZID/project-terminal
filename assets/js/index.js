@@ -1,101 +1,103 @@
-document.addEventListener('DOMContentLoaded', function() {
-    const userInput = document.getElementById('userInput');
-    const output = document.querySelector('.output');
-    const terminalBody = document.querySelector('.terminal-body');
+document.addEventListener('DOMContentLoaded', function () {
+    const terminal = document.getElementById('terminal');
 
-    // Function to focus on userInput field
-    function focusUserInput() {
-        userInput.focus();
+    // Menambahkan prompt awal
+    addCommandLine();
+
+    // Fungsi untuk membuat baris input baru
+    function addCommandLine() {
+        const commandLine = document.createElement('div');
+        commandLine.className = 'flex items-center space-x-2';
+
+        const prompt = `
+            <span class="text-red-500 font-bold">syhrlmyzid@kali</span>
+            <span class="text-gray-100 font-bold">:</span>
+            <span class="text-blue-400 font-bold">~</span>
+            <span class="text-gray-100 font-bold">#</span>
+        `;
+        commandLine.innerHTML = prompt;
+
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.autocomplete = 'off';
+        input.autofocus = true;
+        input.className =
+            'w-full bg-transparent border-none outline-none caret-green-500 text-gray-300 ml-2';
+
+        input.addEventListener('keydown', function (event) {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                const command = input.value.trim();
+                if (command) {
+                    // Menambahkan output berdasarkan command
+                    const response = processCommand(command);
+                    if (response) addOutput(response);
+                    input.disabled = true; // Mematikan input lama
+                    addCommandLine(); // Menambahkan input baru
+                }
+            }
+        });
+
+        commandLine.appendChild(input);
+        terminal.appendChild(commandLine);
+        input.focus();
+        terminal.scrollTop = terminal.scrollHeight; // Scroll otomatis ke bawah
     }
 
-    // Initial focus on page load
-    focusUserInput();
+    // Fungsi untuk menambahkan output
+    function addOutput(response) {
+        const output = document.createElement('div');
+        output.className = 'text-gray-400';
 
-    userInput.addEventListener('keydown', function(event) {
-        if (event.key === 'Enter') {
-            event.preventDefault();
-            const command = userInput.value.trim();
-            const response = processCommand(command);
-            if (command) {
-                // Create a new div element for the command entered
-                const commandOutput = document.createElement('div');
-                commandOutput.classList.add('command-line');
-                output.appendChild(commandOutput); // Append command to output
-            }
-            userInput.value = '';
-            focusUserInput(); // Keep focus on input field after enter
-            if (response) {
-                // Create a new div element for the response
-                const responseOutput = document.createElement('div');
-                responseOutput.classList.add('response-line');
-                output.appendChild(responseOutput); // Append response to output
-                animateTypeOut(responseOutput, response); // Trigger typing animation for response
-            }
-        }
-    });
+        // Tambahkan hanya respons tanpa mencetak ulang command input
+        output.innerHTML = response;
+        terminal.appendChild(output);
+        terminal.scrollTop = terminal.scrollHeight; // Scroll otomatis ke bawah
+    }
 
+    // Fungsi untuk memproses perintah
     function processCommand(command) {
         const cmd = command.toLowerCase();
 
-        // Handle different commands
         switch (cmd) {
             case 'whois':
                 return 'Hey there! My name is .... , and I am a developer!!!';
             case 'about':
-                return 'This is a Terminal Website which functions like a terminal with its own commands';
+                return 'This is a Terminal Website which functions like a terminal with its own commands.';
             case 'help':
-                return 'Help menu:\n<div class="help-text-container"><pre class="help-text">whois\nhelp\nabout\ncontact\nclear\necho\nproblem</pre></div>';
+                return `
+                    <span>Help menu:</span>
+                    <ul class="list-disc pl-5">
+                        <li>whois</li>
+                        <li>help</li>
+                        <li>about</li>
+                        <li>contact</li>
+                        <li>clear</li>
+                        <li>echo</li>
+                        <li>problem</li>
+                        <li>exit</li>
+                    </ul>
+                `;
             case 'contact':
                 return 'You can reach me via email at "info@gmail.com".';
-                case 'problem':
-                return 'If you cannot see the inupt field, thats fine keep on writting.';
+            case 'problem':
+                return 'If you cannot see the input field, that is fine. Keep on writing.';
             case 'clear':
                 clearTerminal();
-                return ''; // Return empty string after clearing terminal
-            case '':
-                return ''; // Handle empty input gracefully
+                return '';
+            case 'exit':
+                location.reload(); // Me-reload halaman ketika perintah 'exit' dimasukkan
+                return '';
             default:
                 if (cmd.startsWith('echo ')) {
                     return cmd.substring(5); // Echo back the text after 'echo '
                 }
-                return `Command not found: ${command}`;
+                return `<span class="text-red-500">Command not found:</span> ${command}`;
         }
     }
 
+    // Fungsi untuk membersihkan terminal
     function clearTerminal() {
-        output.innerHTML = ''; // Clear the output content
-        // Scroll to the top after clearing
-        terminalBody.scrollTop = 0;
-    }
-
-    // Ensure userInput remains focused when clicking away
-    document.addEventListener('click', function(event) {
-        if (!userInput.contains(event.target)) {
-            focusUserInput();
-        }
-    });
-
-    function animateTypeOut(element, text) {
-        element.innerHTML = ''; // Clear existing text
-        let i = 0;
-
-        function type() {
-            if (i < text.length) {
-                let currentChar = text.charAt(i);
-                if (currentChar === '<') {
-                    const endTagIndex = text.indexOf('>', i);
-                    if (endTagIndex !== -1) {
-                        element.innerHTML += text.substring(i, endTagIndex + 1);
-                        i = endTagIndex + 1;
-                    }
-                } else {
-                    element.innerHTML += currentChar;
-                    i++;
-                }
-                setTimeout(type, 50); // Adjust typing speed here
-            }
-        }
-
-        type();
+        terminal.innerHTML = '';
     }
 });
