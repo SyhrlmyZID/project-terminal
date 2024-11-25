@@ -1,4 +1,4 @@
 # Project Terminal
-Project ini masih belum beres jadi masih tahap pengembangan!
+Project ini belum selesai masih dalam tahap pengembangan!
 
 ![](screenshot.PNG)
