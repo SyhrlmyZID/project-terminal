@@ -1,10 +1,21 @@
 document.addEventListener('DOMContentLoaded', function () {
     const terminal = document.getElementById('terminal');
+    const commandHistory = [];
+    let historyIndex = -1;
 
-    // Menambahkan prompt awal
     addCommandLine();
 
-    // Fungsi untuk membuat baris input baru
+    // Event global untuk menangkap penekanan tombol
+    document.addEventListener('keydown', function (event) {
+        const activeInput = document.activeElement;
+        if (activeInput.tagName !== 'INPUT') {
+            const inputs = terminal.querySelectorAll('input');
+            if (inputs.length > 0) {
+                inputs[inputs.length - 1].focus();
+            }
+        }
+    });
+
     function addCommandLine() {
         const commandLine = document.createElement('div');
         commandLine.className = 'flex items-center space-x-2';
@@ -29,11 +40,25 @@ document.addEventListener('DOMContentLoaded', function () {
                 event.preventDefault();
                 const command = input.value.trim();
                 if (command) {
-                    // Menambahkan output berdasarkan command
+                    commandHistory.push(command);
+                    historyIndex = commandHistory.length; // Reset index
                     const response = processCommand(command);
-                    if (response) addOutput(response);
-                    input.disabled = true; // Mematikan input lama
-                    addCommandLine(); // Menambahkan input baru
+                    if (response) addAnimatedOutput(response);
+                    input.disabled = true;
+                    addCommandLine();
+                }
+            } else if (event.key === 'ArrowUp') {
+                if (historyIndex > 0) {
+                    historyIndex--;
+                    input.value = commandHistory[historyIndex];
+                }
+            } else if (event.key === 'ArrowDown') {
+                if (historyIndex < commandHistory.length - 1) {
+                    historyIndex++;
+                    input.value = commandHistory[historyIndex];
+                } else {
+                    historyIndex = commandHistory.length;
+                    input.value = '';
                 }
             }
         });
@@ -41,62 +66,80 @@ document.addEventListener('DOMContentLoaded', function () {
         commandLine.appendChild(input);
         terminal.appendChild(commandLine);
         input.focus();
-        terminal.scrollTop = terminal.scrollHeight; // Scroll otomatis ke bawah
+        terminal.scrollTop = terminal.scrollHeight;
     }
 
-    // Fungsi untuk menambahkan output
-    function addOutput(response) {
+    // Function to animate output text
+    function addAnimatedOutput(response) {
         const output = document.createElement('div');
-        output.className = 'text-gray-400';
+        output.className = 'text-gray-400 whitespace-pre-wrap';
 
-        // Tambahkan hanya respons tanpa mencetak ulang command input
-        output.innerHTML = response;
         terminal.appendChild(output);
-        terminal.scrollTop = terminal.scrollHeight; // Scroll otomatis ke bawah
+        terminal.scrollTop = terminal.scrollHeight;
+
+        let currentIndex = 0;
+        const characters = response.split('');
+        const typingInterval = 10; // Adjust speed of typing animation
+
+        function typeCharacter() {
+            if (currentIndex < characters.length) {
+                output.innerHTML += characters[currentIndex++];
+                terminal.scrollTop = terminal.scrollHeight; // Auto scroll
+                setTimeout(typeCharacter, typingInterval);
+            }
+        }
+
+        typeCharacter();
     }
 
-    // Fungsi untuk memproses perintah
     function processCommand(command) {
         const cmd = command.toLowerCase();
 
         switch (cmd) {
-            case 'whois':
-                return 'Hey there! My name is .... , and I am a developer!!!';
             case 'about':
-                return 'This is a Terminal Website which functions like a terminal with its own commands.';
+                return `
+Halo! Perkenalkan nama saya syahrul, saya seorang software engineering
+dan untuk bidang yang di perdalam adalah sebagai web developer, prompt engineer, dan cyber security.`;
             case 'help':
                 return `
-                    <span>Help menu:</span>
-                    <ul class="list-disc pl-5">
-                        <li>whois</li>
-                        <li>help</li>
-                        <li>about</li>
-                        <li>contact</li>
-                        <li>clear</li>
-                        <li>echo</li>
-                        <li>problem</li>
-                        <li>exit</li>
-                    </ul>
-                `;
+Help Menu:
+- help          : Menampilkan menu bantuan
+- contact       : Informasi kontak
+- socialmedia   : Tautan ke media sosial saya
+- skills        : Skill yang saya kuasai
+- clear         : Membersihkan layar terminal
+- exit          : Menutup terminal`;
             case 'contact':
-                return 'You can reach me via email at "info@gmail.com".';
-            case 'problem':
-                return 'If you cannot see the input field, that is fine. Keep on writing.';
+                return `
+Jika ingin bertanya atau bisnis lain bisa hubungi saya:
+- Email: syhrlmyz.id@gmail.com`;
+            case 'socialmedia':
+                return `
+Sosial Media Saya:
+- Instagram: [Click Disini](#)
+- Youtube: [Click Disini](#)
+- Github: [Click Disini](#)`;
+            case 'skills':
+                return `
+Berikut skill yang saya kuasai:
+- HTML5
+- CSS3
+- JavaScript
+- Java
+- Python
+- MySQL
+- Lua`;
             case 'clear':
                 clearTerminal();
                 return '';
             case 'exit':
-                location.reload(); // Me-reload halaman ketika perintah 'exit' dimasukkan
+                location.reload();
                 return '';
             default:
-                if (cmd.startsWith('echo ')) {
-                    return cmd.substring(5); // Echo back the text after 'echo '
-                }
-                return `<span class="text-red-500">Command not found:</span> ${command}`;
+                return `Perintah "${cmd}" tidak dikenali. Ketik "help" untuk daftar perintah.`;
         }
     }
 
-    // Fungsi untuk membersihkan terminal
     function clearTerminal() {
         terminal.innerHTML = '';
     }
